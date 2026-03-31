@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>睫角守宫养殖管理系统</title>
+
+  <!-- ===== PWA / iOS 安装支持 ===== -->
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS Safari 全屏模式 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="守宫管理" />
+
+  <!-- iOS 图标 -->
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+
+  <!-- Theme color（安卓 Chrome 地址栏颜色 / iOS 状态栏颜色） -->
+  <meta name="theme-color" content="#7c9a6e" />
+
+  <!-- 普通桌面图标备用 -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+
+  <!-- 禁止自动识别电话号码（iOS 默认行为） -->
+  <meta name="format-detection" content="telephone=no" />
+  <!-- ============================ -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🦎</span>
+      <div class="logo-text">
+        <span class="logo-main">睫角守宫</span>
+        <span class="logo-sub">养殖管理系统</span>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-tab="dashboard">📊 总览</button>
+      <button class="nav-btn" data-tab="geckos">🦎 个体管理</button>
+      <button class="nav-btn" data-tab="feeding">🍽️ 喂食记录</button>
+      <button class="nav-btn" data-tab="breeding">🥚 繁殖管理</button>
+      <button class="nav-btn" data-tab="health">💊 健康档案</button>
+    </nav>
+  </div>
+</header>
+
+<main class="main-content">
+
+  <!-- ========== 总览面板 ========== -->
+  <section class="tab-panel active" id="tab-dashboard">
+    <div class="page-title">
+      <h1>今日概览</h1>
+      <p class="page-date" id="today-date"></p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:#a8d8a8">
+        <div class="stat-icon">🦎</div>
+        <div class="stat-info">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-label">在养个体</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#f7c59f">
+        <div class="stat-icon">🍽️</div>
+        <div class="stat-info">
+          <div class="stat-num" id="stat-fed-today">0</div>
+          <div class="stat-label">今日喂食</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#f4a7b9">
+        <div class="stat-icon">🥚</div>
+        <div class="stat-info">
+          <div class="stat-num" id="stat-eggs">0</div>
+          <div class="stat-label">孵化中的蛋</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#b8c0ff">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-num" id="stat-alert">0</div>
+          <div class="stat-label">需关注</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 近期喂食提醒 -->
+    <div class="dashboard-section">
+      <h2>🔔 喂食提醒</h2>
+      <div class="reminder-list" id="reminder-list">
+        <div class="empty-hint">暂无需要喂食的提醒</div>
+      </div>
+    </div>
+
+    <!-- 最近记录 -->
+    <div class="dashboard-section">
+      <h2>📋 最新动态</h2>
+      <div class="activity-list" id="activity-list">
+        <div class="empty-hint">暂无记录</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 个体管理 ========== -->
+  <section class="tab-panel" id="tab-geckos">
+    <div class="page-title">
+      <h1>个体管理</h1>
+      <button class="btn-primary" id="btn-add-gecko">＋ 添加个体</button>
+    </div>
+    <div class="gecko-grid" id="gecko-grid">
+      <div class="empty-hint">还没有添加任何个体，点击右上角添加吧！</div>
+    </div>
+  </section>
+
+  <!-- ========== 喂食记录 ========== -->
+  <section class="tab-panel" id="tab-feeding">
+    <div class="page-title">
+      <h1>喂食记录</h1>
+      <button class="btn-primary" id="btn-add-feeding">＋ 添加记录</button>
+    </div>
+    <div class="filter-bar">
+      <select id="filter-gecko-feed" class="filter-select">
+        <option value="">全部个体</option>
+      </select>
+      <input type="month" id="filter-month-feed" class="filter-input" />
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table" id="feeding-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>个体</th>
+            <th>食物类型</th>
+            <th>食量</th>
+            <th>喂食状态</th>
+            <th>备注</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="feeding-tbody">
+          <tr><td colspan="7" class="empty-hint">暂无喂食记录</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== 繁殖管理 ========== -->
+  <section class="tab-panel" id="tab-breeding">
+    <div class="page-title">
+      <h1>繁殖管理</h1>
+      <button class="btn-primary" id="btn-add-egg">＋ 记录产蛋</button>
+    </div>
+    <div class="breeding-grid" id="breeding-grid">
+      <div class="empty-hint">暂无繁殖记录</div>
+    </div>
+  </section>
+
+  <!-- ========== 健康档案 ========== -->
+  <section class="tab-panel" id="tab-health">
+    <div class="page-title">
+      <h1>健康档案</h1>
+      <button class="btn-primary" id="btn-add-health">＋ 添加健康记录</button>
+    </div>
+    <div class="filter-bar">
+      <select id="filter-gecko-health" class="filter-select">
+        <option value="">全部个体</option>
+      </select>
+      <select id="filter-type-health" class="filter-select">
+        <option value="">全部类型</option>
+        <option value="weight">体重记录</option>
+        <option value="molt">蜕皮记录</option>
+        <option value="illness">疾病记录</option>
+        <option value="treatment">治疗记录</option>
+        <option value="observation">日常观察</option>
+      </select>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table" id="health-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>个体</th>
+            <th>记录类型</th>
+            <th>体重(g)</th>
+            <th>健康状态</th>
+            <th>描述</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="health-tbody">
+          <tr><td colspan="7" class="empty-hint">暂无健康记录</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ========== 弹窗：添加个体 ========== -->
+<div class="modal-overlay" id="modal-gecko">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="gecko-modal-title">添加个体</h3>
+      <button class="modal-close" data-close="modal-gecko">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>名称/编号 *</label>
+          <input type="text" id="gecko-name" placeholder="例如：小绿、G001" />
+        </div>
+        <div class="form-group">
+          <label>性别</label>
+          <select id="gecko-sex">
+            <option value="未知">未知</option>
+            <option value="雄">雄</option>
+            <option value="雌">雌</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>品系/颜色变异</label>
+          <input type="text" id="gecko-morph" placeholder="例如：哈利奎因、火焰" />
+        </div>
+        <div class="form-group">
+          <label>出生日期</label>
+          <input type="date" id="gecko-birthdate" />
+        </div>
+        <div class="form-group">
+          <label>来源</label>
+          <input type="text" id="gecko-source" placeholder="例如：自繁、购入" />
+        </div>
+        <div class="form-group">
+          <label>当前体重(g)</label>
+          <input type="number" id="gecko-weight" placeholder="0.0" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label>健康状态</label>
+          <select id="gecko-health-status">
+            <option value="健康">健康</option>
+            <option value="观察中">观察中</option>
+            <option value="治疗中">治疗中</option>
+            <option value="隔离">隔离</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>喂食周期(天)</label>
+          <input type="number" id="gecko-feed-cycle" value="3" min="1" />
+        </div>
+        <div class="form-group full-width">
+          <label>备注</label>
+          <textarea id="gecko-notes" placeholder="其他备注信息..." rows="3"></textarea>
+        </div>
+        <!-- 照片上传区 -->
+        <div class="form-group full-width">
+          <label>照片（最多 3 张，首张作为头像）</label>
+          <div class="photo-upload-grid" id="photo-upload-grid">
+            <div class="photo-slot" data-slot="0">
+              <input type="file" class="photo-input" accept="image/*" id="photo-input-0" />
+              <div class="photo-slot-inner" onclick="document.getElementById('photo-input-0').click()">
+                <span class="photo-slot-icon">📷</span>
+                <span class="photo-slot-label">首张 / 头像</span>
+              </div>
+            </div>
+            <div class="photo-slot" data-slot="1">
+              <input type="file" class="photo-input" accept="image/*" id="photo-input-1" />
+              <div class="photo-slot-inner" onclick="document.getElementById('photo-input-1').click()">
+                <span class="photo-slot-icon">＋</span>
+                <span class="photo-slot-label">第 2 张</span>
+              </div>
+            </div>
+            <div class="photo-slot" data-slot="2">
+              <input type="file" class="photo-input" accept="image/*" id="photo-input-2" />
+              <div class="photo-slot-inner" onclick="document.getElementById('photo-input-2').click()">
+                <span class="photo-slot-icon">＋</span>
+                <span class="photo-slot-label">第 3 张</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-gecko">取消</button>
+      <button class="btn-primary" id="save-gecko">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：添加喂食记录 ========== -->
+<div class="modal-overlay" id="modal-feeding">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>添加喂食记录</h3>
+      <button class="modal-close" data-close="modal-feeding">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>日期 *</label>
+          <input type="date" id="feed-date" />
+        </div>
+        <div class="form-group">
+          <label>个体 *</label>
+          <select id="feed-gecko"></select>
+        </div>
+        <div class="form-group">
+          <label>食物类型 *</label>
+          <select id="feed-type">
+            <option value="蟑螂">蟑螂（杜比亚/德豆）</option>
+            <option value="蟋蟀">蟋蟀</option>
+            <option value="麦皮虫">麦皮虫</option>
+            <option value="果泥">果泥/CGD</option>
+            <option value="蜡虫">蜡虫</option>
+            <option value="乳鼠">乳鼠</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>食量</label>
+          <input type="text" id="feed-amount" placeholder="例如：3只、5ml" />
+        </div>
+        <div class="form-group">
+          <label>喂食状态</label>
+          <select id="feed-status">
+            <option value="正常进食">正常进食</option>
+            <option value="拒食">拒食</option>
+            <option value="进食少量">进食少量</option>
+            <option value="大量进食">大量进食</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>是否添加钙粉</label>
+          <select id="feed-calcium">
+            <option value="是">是</option>
+            <option value="否">否</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>备注</label>
+          <textarea id="feed-notes" placeholder="备注信息..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-feeding">取消</button>
+      <button class="btn-primary" id="save-feeding">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：产蛋记录 ========== -->
+<div class="modal-overlay" id="modal-egg">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="egg-modal-title">记录产蛋</h3>
+      <button class="modal-close" data-close="modal-egg">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>产蛋日期 *</label>
+          <input type="date" id="egg-date" />
+        </div>
+        <div class="form-group">
+          <label>母本个体 *</label>
+          <select id="egg-mother"></select>
+        </div>
+        <div class="form-group">
+          <label>父本个体</label>
+          <select id="egg-father">
+            <option value="">未知/未记录</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>产蛋数量</label>
+          <input type="number" id="egg-count" value="2" min="1" max="10" />
+        </div>
+        <div class="form-group">
+          <label>受精情况</label>
+          <select id="egg-fertility">
+            <option value="待确认">待确认</option>
+            <option value="受精">受精（有血丝）</option>
+            <option value="未受精">未受精</option>
+            <option value="部分受精">部分受精</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>孵化温度(℃)</label>
+          <input type="number" id="egg-temp" placeholder="25~28" step="0.5" />
+        </div>
+        <div class="form-group">
+          <label>孵化介质</label>
+          <input type="text" id="egg-medium" placeholder="例如：蛭石、椰土" />
+        </div>
+        <div class="form-group">
+          <label>孵化状态</label>
+          <select id="egg-hatch-status">
+            <option value="孵化中">孵化中</option>
+            <option value="已孵化">已孵化</option>
+            <option value="坏蛋">坏蛋</option>
+            <option value="未受精丢弃">未受精丢弃</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>预计孵化日期</label>
+          <input type="date" id="egg-expected" />
+        </div>
+        <div class="form-group full-width">
+          <label>备注</label>
+          <textarea id="egg-notes" placeholder="备注信息..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-egg">取消</button>
+      <button class="btn-primary" id="save-egg">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：健康记录 ========== -->
+<div class="modal-overlay" id="modal-health">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>添加健康记录</h3>
+      <button class="modal-close" data-close="modal-health">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>日期 *</label>
+          <input type="date" id="health-date" />
+        </div>
+        <div class="form-group">
+          <label>个体 *</label>
+          <select id="health-gecko"></select>
+        </div>
+        <div class="form-group">
+          <label>记录类型</label>
+          <select id="health-type">
+            <option value="weight">体重记录</option>
+            <option value="molt">蜕皮记录</option>
+            <option value="illness">疾病记录</option>
+            <option value="treatment">治疗记录</option>
+            <option value="observation">日常观察</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>体重(g)</label>
+          <input type="number" id="health-weight" placeholder="0.0" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label>健康状态</label>
+          <select id="health-status">
+            <option value="健康">健康</option>
+            <option value="观察中">观察中</option>
+            <option value="治疗中">治疗中</option>
+            <option value="隔离">隔离</option>
+            <option value="已康复">已康复</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>描述 / 症状 / 处理</label>
+          <textarea id="health-desc" placeholder="详细描述..." rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-health">取消</button>
+      <button class="btn-primary" id="save-health">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：个体详情 ========== -->
+<div class="modal-overlay" id="modal-gecko-detail">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h3 id="detail-title">个体详情</h3>
+      <button class="modal-close" data-close="modal-gecko-detail">✕</button>
+    </div>
+    <div class="modal-body" id="gecko-detail-body">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="modal-gecko-detail">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 灯箱预览 ========== -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="预览" />
+</div>
+
+<script src="seed-demo.js"></script>
+<script src="app.js"></script>
+
+<!-- ===== PWA Service Worker 注册 ===== -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('[SW] 注册成功，scope:', reg.scope))
+        .catch(err => console.warn('[SW] 注册失败:', err));
+    });
+  }
+</script>
+<!-- ==================================== -->
+</body>
+</html>
