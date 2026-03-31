@@ -34,6 +34,33 @@
 </head>
 <body>
 
+<!-- ========== 登录遮罩 ========== -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="login-logo-icon">🦎</span>
+      <div>
+        <div class="login-logo-main">睫角守宫</div>
+        <div class="login-logo-sub">养殖管理系统</div>
+      </div>
+    </div>
+    <h2 class="login-title">请输入访问密码</h2>
+    <div class="login-form">
+      <input
+        type="password"
+        id="login-password"
+        class="login-input"
+        placeholder="请输入密码..."
+        autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()"
+      />
+      <button class="login-btn" onclick="doLogin()">进入系统</button>
+    </div>
+    <div class="login-error" id="login-error">密码错误，请重试</div>
+  </div>
+</div>
+<!-- ================================ -->
+
 <!-- 顶部导航 -->
 <header class="site-header">
   <div class="header-inner">
@@ -517,5 +544,41 @@
   }
 </script>
 <!-- ==================================== -->
+<!-- ===== 登录验证脚本 ===== -->
+<script>
+  (function() {
+    // ★ 在这里修改你的访问密码 ★
+    var ACCESS_PASSWORD = 'gecko2024';
+    var SESSION_KEY = 'gecko_auth';
+
+    function doLogin() {
+      var input = document.getElementById('login-password').value;
+      var errEl = document.getElementById('login-error');
+      if (input === ACCESS_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        document.getElementById('login-overlay').style.display = 'none';
+        errEl.style.display = 'none';
+      } else {
+        errEl.style.display = 'block';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-password').focus();
+      }
+    }
+    window.doLogin = doLogin;
+
+    // 页面加载时检查会话
+    if (sessionStorage.getItem(SESSION_KEY) !== '1') {
+      document.getElementById('login-overlay').style.display = 'flex';
+      // 延迟聚焦，避免移动端弹出键盘干扰
+      setTimeout(function() {
+        document.getElementById('login-password').focus();
+      }, 300);
+    } else {
+      document.getElementById('login-overlay').style.display = 'none';
+    }
+  })();
+</script>
+<!-- ========================== -->
+
 </body>
 </html>
